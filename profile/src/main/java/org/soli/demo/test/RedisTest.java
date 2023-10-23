@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class RedisTest {
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Test
     public void TestRedis() {
@@ -20,12 +20,12 @@ public class RedisTest {
 
         String key = "hello";
 
-        redisTemplate.delete("helle");
-//        redisTemplate.opsForValue().set("hello", "你好");
-//
-//        String res = (String) redisTemplate.opsForValue().get(key);
-//
-//        System.out.println(res);
+
+        redisTemplate.opsForValue().set("hello", "你好");
+
+        String res = redisTemplate.opsForValue().get(key);
+
+        System.out.println(res);
 
     }
 }

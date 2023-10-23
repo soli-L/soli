@@ -2,12 +2,15 @@ package org.soli.demo.controller;
 
 import org.soli.demo.pojo.Student;
 import org.soli.demo.service.StudentService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @RestController
+@RequestMapping("/student")
 public class DemoController {
 
     @Resource
@@ -23,12 +26,14 @@ public class DemoController {
         Student student = new Student();
         student.setName(name);
         student.setAge(age);
-        boolean save = studentService.save(student);
-        return save;
-
+        return studentService.save(student);
+        
     }
 
-
+    @RequestMapping("/getStudentById")
+    public List<Student> getStudent(@RequestParam int id) {
+        return studentService.getStudentList(id);
+    }
 
     @RequestMapping("/hello")
     public String Hello() {
