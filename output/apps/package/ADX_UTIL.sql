@@ -1,0 +1,20 @@
+
+  CREATE OR REPLACE EDITIONABLE PACKAGE "APPS"."ADX_UTIL" AUTHID DEFINER AS
+/* $Header: ADXUTILS.pls 120.0.12020000.3 2021/06/09 17:31:56 rsatyava ship $ */
+
+
+ FUNCTION GET_DB_NAME RETURN VARCHAR2;
+
+end ADX_UTIL;
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "APPS"."ADX_UTIL" AS
+ /* $Header: ADXUTILB.pls 120.0.12020000.1 2016/06/16 12:00:10 sbandla noship $ */
+
+ FUNCTION GET_DB_NAME return varchar2 is
+   dbname varchar2(256);
+   begin
+     select SYS_CONTEXT('USERENV','DB_NAME')
+       into dbname from dual;
+     return dbname;
+ end GET_DB_NAME;
+
+END ADX_UTIL;

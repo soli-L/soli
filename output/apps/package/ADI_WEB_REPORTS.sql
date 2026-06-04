@@ -1,0 +1,104 @@
+
+  CREATE OR REPLACE EDITIONABLE PACKAGE "APPS"."ADI_WEB_REPORTS" AUTHID CURRENT_USER AS
+/* $Header: frmkosks.pls 120.0 2006/12/14 02:05:13 dvayro noship $ */
+----------------------------------------------------------------------------------------
+--  PACKAGE:      ADI_Web_Reports                                                     --
+--                                                                                    --
+--  DESCRIPTION:  Creates the menu structure for the Web Reporting Kiosk.             --
+--                                                                                    --
+--  Modifications                                                                     --
+--  Date       Username   Description                                                 --
+--  26-JUN-99  cclyde     Initial creation                                            --
+--  16-FEB-00  cclyde     Added Package_Revision procedure to see if we can capture   --
+--                        the revision number of the package during runtime.          --
+--                              (Task:  3858)                                         --
+--  16-MAY-00  GSANAP     Moved the $Header comment from the top to under             --
+--                        the CREATE OR REPLACE PACKAGE stmt.                         --
+--  14-NOV-02  GHOOKER    Stub out procedures not used by RM8                         --
+----------------------------------------------------------------------------------------
+END ADI_Web_Reports;
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "APPS"."ADI_WEB_REPORTS" AS
+/* $Header: frmkoskb.pls 120.0 2006/12/14 02:05:03 dvayro noship $ */
+----------------------------------------------------------------------------------------
+--  PACKAGE:      ADI_Web_Reports                                                     --
+--                                                                                    --
+--  DESCRIPTION:  Creates the menu structure for the Web Reporting Kiosk.             --
+--                                                                                    --
+--  Modifications                                                                     --
+--  Date       Username   Description                                                 --
+--  26-JUN-99  cclyde     Initial creation                                            --
+--  07-AUG-99  cclyde     Changed the background colour for the login screen.  Now set--
+--                        to FFFFB7, which is the same as the Icon frame.             --
+--  09-AUG-00  cclyde     Changed the icons to constant variables and changed their   --
+--                        names.                                                      --
+--                        Added new icon for login page  ADISPLASH.gif and moved the  --
+--                        the location (centered more).                               --
+--                        Added focus functionality so that the cursor is positioned  --
+--                        in the 'username' field when the signon screen is loaded.   --
+--                        Removed the Session Id and Language from the root label.    --
+--  09-AUG-99  CCLYDE     Removed the splash image from the table (upsetting field    --
+--                        and button line ups.    (Login)                             --
+--  10-AUG-99  CCLYDE     Changed displayed icon to the construction worker.          --
+--                        (Startover)                                                 --
+--  23-AUG-99  CCLYDE     Added the check against the responsibility table where the  --
+--                        Responsibility Name = ADI_KIOSK_PUBLIC_RESPONSIBILITY.      --
+--                        This removes possible duplicates from the secured menu.     --
+--                        (Task:  3293)  (ShowSecuredRoot)                            --
+--  23-AUG-99  CCLYDE     Changed the condition to '< 11.5' when building the menu    --
+--                        entry.  Release 11.0 does not use all the security infor-   --
+--                        mation now built into Release 11.5.  (Task: 3294)           --
+--                        (BuildSecuredEntries)                                       --
+--  23-AUG-99  CCLYDE     Changed the condition around the SQL statement to '< 11.5'  --
+--                        because 'FND_USER_RESP_GROUPS' is a new table in Release 11,--
+--                        not Release 11.5 as originally thought.  (Task:  3294)      --
+--                        (ShowSecuredMenu)                                           --
+--  23-AUG-99  CCLYDE     Changed setfocus to setfocuslogin so that it's more         --
+--                        specific.  Added the second function, setfocuspword so that --
+--                        tabbing from the username field will take the user into the --
+--                        password field.  (Task:  3289)   (Login)                    --
+--  25-AUG-99  CCLYDE     Modified the spacer images and the splash logo to fit into  --
+--                        an 800x600 window.   (Task: 3325)   (Login)                 --
+--  28-AUG-99  CCLYDE     Added Exception clauses to all procedures which contained a --
+--                        SQL statement.   (Task: 3275)                               --
+--  31-AUG-99  CCLYDE     Changed ADI_REPORT_LINK to FRM_REPORT_LINK.  (Task: 3400)   --
+--  01-SEP-99  CCLYDE     Removed the hard-coded URL from the Profile insert          --
+--                        statement.    (Update_Web_Option)                           --
+--  07-SEP-99  CCLYDE     Added the UNION statement so that the code also  retrieved  --
+--                        the Self Service functions.  10.7 uses a different schema   --
+--                        model to 11.0.  (Task: 3324)   (Show_Menu)                  --
+--  08-SEP-99  CCLYDE     Added 'PUBLIC' to pageBanner parameter list.  This          --
+--                        determines which icon to display and the action reqiured    --
+--                        when the user clicks on the icon.   (Task:  3381)  (Login)  --
+--  27-OCT-99  CCLYDE     Added a check to the SQL statement so that the Responsib-   --
+--                        ilities are only retrieved if the User still has access to  --
+--                        to them.  Originally, the code only checked that the Resps  --
+--                        were valid.                                                 --
+--  17-NOV-99  CCLYDE     Changed the check on the current release for 11.5, not 11.0.--
+--                        GetProtocol calls a routine called FND_WEB_CONFIG.PROTOCOL  --
+--                        which does not exist until Release 11.5.  (Task: 3755)      --
+--                            (Build_Public_Entries)                                  --
+--  04-FEB-00  cclyde     Added double quotes around l_profile_value within the       --
+--                        Insert statement.  Causing a missing ',' error, when the    --
+--                        report link profile does not exist.   (UpdateWebProfile)    --
+--  16-FEB-00  cclyde     Added Package_Revision procedure to see if we can capture   --
+--                        the revision number of the package during runtime.          --
+--                              (Task:  3858)                                         --
+--  24-FEB-00  cclyde     Changed USR to GRP in second half of the UNION statement.   --
+--                        USR was not valid as a table identifier.                    --
+--                            ShowSecuredRoot    Task:  3883.                         --
+--  16-MAY-00  GSANAP     Moved the $Header comment from the top to under             --
+--                        the CREATE OR REPLACE PACKAGE stmt.                         --
+--  29-JUN-00  GSANAP     Modified the Debugs stmts. to include package names         --
+--                        Task 4425                                                   --
+--  28-AUG-02  tobermei   commented out references to ADI_ui_jstree package for       --
+--                        bug 2530939 resolution, these aren't used anymore with the  --
+--                        java report manager code, much more in this package can     --
+--                        most likely go, if you look at the Public_Home procedure,   --
+--                        you will see that it redirects to BneApplicationService     --
+--                        which is now oracle.apps.bne.webui.BneApplicationService    --
+--  12-SEP-02  tobermei   one more reference to ADI_ui_jstree had to be commented out --
+--                        for bug 2530939 resolution.                                 --
+--  14-NOV-02  GHOOKER    Stub out procedures not used by RM8                         --
+----------------------------------------------------------------------------------------
+END ADI_Web_Reports;

@@ -1,0 +1,93 @@
+
+  CREATE OR REPLACE EDITIONABLE PACKAGE "APPS"."ADI_SECURITY_NOMINATE" AUTHID CURRENT_USER AS
+/* $Header: frmsnoms.pls 120.0 2006/12/14 02:08:14 dvayro noship $ */
+--------------------------------------------------------------------------------
+--  PACKAGE:      ADI_Security_Nominate                                       --
+--                                                                            --
+--  DESCRIPTION:  Allows the user to select any number of flex values sets to --
+--                participate within the User To Value Security model.        --
+--                                                                            --
+--  Modification History                                                      --
+--  Date       Username    Description                                        --
+--  18-JUN-99  CCLYDE      Initial creation                                   --
+--  16-FEB-00  cclyde      Added Package_Revision procedure to see if we can  --
+--                         capture the revision number of the package during  --
+--                         runtime.     (Task: 3858)                          --
+--  16-MAY-00 GSANAP       Moved the $Header comment from the top and replced --
+--                         CREATE OR REPLACE PACKAGE IS TO AS                 --
+--  02-JUN-00 GSANAP       Renamed AddValue to ValueSetDisplayFrame and       --
+--                         added a parameter p_ValueSetSearch. Created new    --
+--                         AddValue and ValueSetSearchFrame procedures.       --
+--                         (Task : 4363)                                      --
+--  15-NOV-02  GHOOKER    Stub out procedures not used by RM8                 --
+--------------------------------------------------------------------------------
+END ADI_Security_Nominate;
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "APPS"."ADI_SECURITY_NOMINATE" AS
+/* $Header: frmsnomb.pls 120.0 2006/12/14 02:08:02 dvayro noship $ */
+--------------------------------------------------------------------------------
+--  PACKAGE:      ADI_Security_Nominate                                       --
+--                                                                            --
+--  DESCRIPTION:  Allows the user to select any number of flex values sets to --
+--                participate within the User To Value Security model.        --
+--                                                                            --
+--  Modification History                                                      --
+--  Date       Username    Description                                        --
+--  18-JUN-99  CCLYDE      Initial creation                                   --
+--  09-AUG-99  CCLYDE      Procedures:  Show, AddValue                        --
+--                         Changed the colour of the table header - white     --
+--                         text on a wierd blue background.                   --
+--  28-AUG-99  CCLYDE      Added Exception clauses to all procedures which    --
+--                         contained a SQL statement.   (Task: 3275)          --
+--  10-SEP-99  CCLYDE      Changed v_index; it's now initialised with 1 and   --
+--                         not 2.  See below for details.  (Task: 3486)       --
+--                         (InsertSecuritySets)                               --
+--  02-NOV-99  CCLYDE      Replaced the call to ADI_HEADER_FOOTER.pageHead    --
+--                         with ADI_HEADER_FOOTER.htmlHead and                --
+--                         ADI_HEADER_FOOTER.pageBanner.  This allows better  --
+--                         manipulation of the banner icons.                  --
+--                         Show / AddValue   (Tasks: 3526 / 3598)             --
+--  17-DEC-99  CCLYDE      Due to performance problems, the SELECT statement  --
+--                         (in procedure AddValue) had to be modified so that --
+--                         the NOT IN clause was removed.  As a result of     --
+--                         this, the user has the ability to re-select value  --
+--                         sets previously selected - not a good idea!  Added --
+--                         the NewValueSet function which checks to see if    --
+--                         the value set currently exists... if Yes, the      --
+--                         Value Set is ignored, otherwise, the Value Set     --
+--                         will be created as a new Security Set.             --
+--                           (InsertSecuritySets, AddValue)   (Task: 3780)    --
+--  16-FEB-00  cclyde      Added Package_Revision procedure to see if we can  --
+--                         capture the revision number of the package during  --
+--                         runtime.     (Task: 3858)                          --
+--  24-FEB-00  CCLYDE      Changed the IF form v_flexValueSet.application_id  --
+--                         to g_appsRelease.  v_flexValueSet.application_id   --
+--                         does not exist in Release 11.5.1.  Also, set the   --
+--                         application_id to 265 (Report Manager product).    --
+--                             CreateValueSet    Task:  3885                  --
+--  02-MAR-00  GSANAP      Changed the IF from 11.5 to 11.51 for g_appsRelease--
+--                         Task 3925                                          --
+--  28-MAR-00  GSANAP      Changed the p_ValueSetId parameter in function     --
+--                         NewValueSet & procedures CreateValueSet &          --
+--                         CreateDocument from Integer to Varchar2            --
+--                         Task 4108                                          --
+--  16-MAY-00  GSANAP      Moved the $Header comment from the top and replced --
+--                         CREATE OR REPLACE PACKAGE IS TO AS                 --
+--  02-JUN-00  GSANAP      Renamed AddValue to ValueSetDisplayFrame, created  --
+--                         AddValue and ValueSetSearchFrame. Moved Header &   --
+--                         Banner calls from ValueSetDisplayFrame to          --
+--                         ValueSetSearchFrame                                --
+--                         Task 4363                                          --
+--  21-JUN-00  GSANAP      Removed local Insert stmt. From CreateValueSet     --
+--                         and added a call to fnd_flex_val_api.Create_       --
+--                         valueset_none procedure. Also replaced parameter   --
+--                         p_SecuritySetId with p_SecuritySetName in          --
+--                         CreateValueSet and CreateDocument procedures       --
+--                         Task 4396                                          --
+--  30-JUN-00  GSANAP      Modified the debug stmts. to include package names --
+--                         Task 4425                                          --
+--  07-DEC-00  CCLYDE      New Help tag: rptmgr1005277                        --
+--                           (show, valuesetsearchframe)                      --
+--  15-NOV-02  GHOOKER    Stub out procedures not used by RM8                 --
+--------------------------------------------------------------------------------
+END ADI_Security_Nominate;

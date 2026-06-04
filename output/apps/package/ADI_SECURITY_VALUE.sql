@@ -1,0 +1,139 @@
+
+  CREATE OR REPLACE EDITIONABLE PACKAGE "APPS"."ADI_SECURITY_VALUE" AUTHID CURRENT_USER AS
+/* $Header: frmsvals.pls 120.0 2006/03/19 14:06:05 dvayro noship $ */
+--------------------------------------------------------------------------------
+--  PACKAGE:      ADI_Security_Value_To_User                                  --
+--                                                                            --
+--  DESCRIPTION:  Select a user and a selection of value sets in order to     --
+--                grant and revoke access privileges between user and flex    --
+--                values.                                                     --
+--                                                                            --
+--  Modification History                                                      --
+--  Date       Username    Description                                        --
+--  14-JUL-99  CCLYDE      Initial creation                                   --
+--  16-FEB-00  cclyde      Added Package_Revision procedure to see if we can  --
+--                         capture the revision number of the package during  --
+--                         runtime.     (Task: 3858)                          --
+--  16-MAY-00  GSANAP      Moved the $Header comment from the top to under    --
+--                         the CREATE OR REPLACE PACKAGE stmt.                --
+--  15-NOV-02  GHOOKER    Stub out procedures not used by RM8                 --
+--------------------------------------------------------------------------------
+END ADI_Security_Value;
+
+CREATE OR REPLACE EDITIONABLE PACKAGE BODY "APPS"."ADI_SECURITY_VALUE" AS
+/* $Header: frmsvalb.pls 120.0 2006/03/19 14:09:58 dvayro noship $ */
+--------------------------------------------------------------------------------
+--  PACKAGE:      ADI_Security_Value_To_User                                  --
+--                                                                            --
+--  DESCRIPTION:  Select a user and a selection of value sets in order to     --
+--                grant and revoke access privileges between user and flex    --
+--                values.                                                     --
+--                                                                            --
+--  Modification History                                                      --
+--  Date       Username    Description                                        --
+--  14-JUL-99  CCLYDE      Initial creation                                   --
+--  03-AUG-99  CCLYDE      Added a zillion comments all over the place        --
+--  08-AUG-99  CCLYDE      Changed SQL statements in Procedure Show so that   --
+--                         the username is retrieved as lower case.           --
+--  08-AUG-99  CCLYDE      Procedure: SelectValueSet                          --
+--                         Removed the TO_CHAR around SECFLEX.FLEX_VALUE, it  --
+--                         was supposed to be around the User Id.             --
+--                         Modified button location and put them into the same--
+--                         <TD>.                                              --
+--  08-AUG-99  CCLYDE      Procedure: Show                                    --
+--                         Changed SQL statements so that the username is     --
+--                         retrieved as lower case.                           --
+--  08-AUG-99  CCLYDE      Procedure: Get Username                            --
+--                         Changed username so that it returns in lowercase.  --
+--  08-AUG-99  CCLYDE      Procedure: Check_User_Privileges                   --
+--                         Initial creation                                   --
+--  08-AUG-99  CCLYDE      Procedure: DisplayValues                           --
+--                         Added the business rules around the Add Value      --
+--                         button; user must have the ability to grant access --
+--                         and must not be the same user as the one selected  --
+--                         in the first screen.                               --
+--                         Added complex business rules as to who may modify  --
+--                         what and how the checkboxes are displayed.         --
+--  08-AUG-99  CCLYDE      Procedure: AddValues                               --
+--                         Modified the SQL statement extensively.  The SQL   --
+--                         will only return flex values for which the current --
+--                         user has either Owner or Contact privilege.  From  --
+--                         this list, all the current values for which the    --
+--                         selected user has access to are also excluded.     --
+--                         Added a BACK button and a condition on the NEXT    --
+--                         button - at least one value must be selected before--
+--                         hitting the NEXT button.                           --
+--  09-AUG-99  CCLYDE      Created icons as constant variables and changed the--
+--                         names.                                             --
+--  09-AUG-99  CCLYDE      Column headers now print white on wierd blue back- --
+--                         ground.  (DisplayValues)                           --
+--  09-AUG-99  CCLYDE      Changed the banner title and added a sub title     --
+--                         which includes a success icon and success message. --
+--                         (Confirm)                                          --
+--  28-AUG-99  CCLYDE      Added Exception clauses to all procedures which    --
+--                         contained a SQL statement.   (Task: 3275)          --
+--  08-SEP-99  CCLYDE      Removed the TO_CHAR from around SECVAL.FLEX_VALUE  --
+--                         as this is already defined as a VARCHAR; causing   --
+--                         Invalid Number error.   (Task: 3438)  (AddValues)  --
+--  02-NOV-99  CCLYDE      Calling new banner code which will allow the Home  --
+--                         Page icon to be manipulated (ie. call the relevant --
+--                         home page - Report Manager Kiosk or Self Service). --
+--                         Confirm / Show / SelectValueSet / DisplayValues /  --
+--                         AddValues    (Task: 3526 / 3598)                   --
+--  04-NOV-99  CCLYDE      Changed all occurences of FND_FLEX_VALUES.desc...  --
+--                         to FND_FLEX_VALUES_TL.description.                 --
+--  03-DEC-99  CCLYDE      Added g_SecurityOwner and functionality surrounding--
+--                         this field.  Allowing the user more flexibility in --
+--                         defining who can set ownership privilege:          --
+--                            1.  SYSADMIN user                               --
+--                            2.  System Administration responsibility        --
+--                            3.  Profile Option - FRM_SECURITY_OWNERSHIP.    --
+--  18-DEC-99  CCLYDE      Performance of the security model was dreadful...  --
+--                         Made a head of modifications to improve this to    --
+--                         be useable within a volume database.  (Task: 3784) --
+--                         Changes made summarized below:                     --
+--                         AddValue                                           --
+--                         Removed the NOT IN clauses as they were causing    --
+--                         unwanted performance problems.  We will test later --
+--                         on to see if the Expansion Value selected is a     --
+--                         duplicate.                                         --
+--                         ExpansionValueExists                               --
+--                         New function which checks to see if the new value  --
+--                         already exists within the Security Set table.      --
+--                         CreateValueEntries                                 --
+--                         Makes a call to ExpansionValueExists.  If this     --
+--                         returns TRUE, the code jumps over the insert       --
+--                         statement and no duplicate record is created.      --
+--                         Display Values                                     --
+--                         Re-organized the main query so that it does not    --
+--                         link to the documents table.  This was causing a   --
+--                         major performance problem.  Pulled the documents   --
+--                         stuff out into a seperate select statement.        --
+--  16-FEB-00  cclyde      Added Package_Revision procedure to see if we can  --
+--                         capture the revision number of the package during  --
+--                         runtime.     (Task: 3858)                          --
+--  19-MAR-00  gsanap      Modified the procedure CreateValueEntries so that  --
+--                         the insert into the FND_FLEX_VALUES_TL table can   --
+--                         accomodate the changes to the table for Rel>11.5   --
+--                         The flex_value_meaning column will be populated    --
+--                         with User to Value Security    (Task 4057)         --
+--  16-MAY-00  GSANAP      Moved the $Header comment from the top to          --
+--                         under the CREATE OR REPLACE PACKAGE stmt.          --
+--  29-JUN-00  GSANAP      Implemented AOL api by replacing the local Insert  --
+--                         stmt. with a call to fnd_flex_values_pkg.insert_row--
+--                         procedure. Task 4422                               --
+--  29-JUN-00  GSANAP      Modified the debug stmts. to include package names --
+--                         Task 4425                                          --
+--  16-AUG-00  CCLYDE      Removed the LEFT alignment from the Table deinition--
+--                         as this was causing problems with the UI footer.   --
+--                         The following procedures were modified:            --
+--                                Show                                        --
+--                                SetValueSets                                --
+--                                AddValues                                   --
+--  07-DEC-00  CCLYDE      New Help Tag:  rptmgr1007513                       --
+--                                Confirm           DisplayValues             --
+--                                Show              AddValues                 --
+--                                SelectValueSet    PackageRevision           --
+--  15-NOV-02  GHOOKER    Stub out procedures not used by RM8                 --
+--------------------------------------------------------------------------------
+END ADI_Security_Value;
