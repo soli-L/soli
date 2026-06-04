@@ -8,5 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface StudentMapper extends BaseMapper<Student> {
-    List<Student> getStudentList(Integer id);
+    public List<Student> getStudentList();
 }
